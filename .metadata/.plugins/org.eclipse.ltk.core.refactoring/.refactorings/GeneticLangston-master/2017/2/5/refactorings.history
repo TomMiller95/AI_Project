@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move 4 elements to &apos;OpenGL_Genetic_Langston/src/Res&apos;&#x0A;- Original project: &apos;GeneticLangston-master&apos;&#x0A;- Destination element: &apos;OpenGL_Genetic_Langston/src/Res&apos;&#x0A;- Original elements:&#x0A;     langstonEast.png&#x0A;     langstonSouth.png&#x0A;     langstonNorth.png&#x0A;     langstonWest.png&#x0A;- Update references to refactored element" description="Move files" destination="=OpenGL_Genetic_Langston/src&lt;Res" element1="img/langstonEast.png" element2="img/langstonSouth.png" element3="img/langstonNorth.png" element4="img/langstonWest.png" files="4" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1486181561923" units="0" version="1.0"/>
+</session>
