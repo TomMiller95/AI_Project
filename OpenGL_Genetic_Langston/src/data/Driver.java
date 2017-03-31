@@ -12,32 +12,32 @@ import static Helpers.Artist.*;
 
 public class Driver {
 	
-	private ArrayList<Tile> tiles = new ArrayList<>();
-	static final int TILE_SIZE = 20;
+	private ArrayList<Tile> tiles = new ArrayList<>();	//Holds all of the tiles.
+	static final int TILE_SIZE = 20;	//Size of the tiles.
 	static final int WINDOW_LENGTH = Artist.HEIGHT;	//Same in Artist
 	static final int WINDOW_WIDTH = Artist.WIDTH;	//Same in Artist
 	int halfOfBoardLength = ((WINDOW_LENGTH/TILE_SIZE)/2) * TILE_SIZE;
 	int halfOfBoardWidth = ((WINDOW_WIDTH/TILE_SIZE)/2) * TILE_SIZE;
 	final int OFFSET = 1;	//This is used to make the tiles and the ants look nicely dispersed.
 	final int SPEED = 20;	//The amount of distance the ant goes each step. Basically the TILE_SIZE
-	static int stepsTaken = 0;
-	static Ant ant;
-	String[] colorList = {"white","black","blue","green","yellow","red"};
-	private ArrayList<Ant> ants = new ArrayList<>();
-	private int generation = 0;
+	static int stepsTaken = 0;	//Amount of steps an ant takes in a round.
+	static Ant ant;	//Represents the ant currently being active.
+	String[] colorList = {"white","black","blue","green","yellow","red"};	//Basic list of colors for an ant to recieve.
+	private ArrayList<Ant> ants = new ArrayList<>();	//Holds the ants of the current generation.
+	private int currGeneration = 0;	//Current generation number.
 	private int lastGeneration = 0; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
-	int numOfAntsNeeded = 10;
-	int maxNumOfSteps = 100;
-	float averageFitness = 0;
+	int numOfAntsNeeded = 10;	//Number of ants per generation.
+	int maxNumOfSteps = 100;	//Maximum amount of steps an ant can take before it dies.
+	float averageFitness = 0;	//Total fitness throughout a generation.
 	static int visitedTiles = 1;	//Number of tiles touched so far.
 	int sameTileCount = 0; 	//Counter to see if ant has made any progress.
-	int noProgressCount = 0;
+	int noProgressCount = 0;	//Used to see if an ant is making progess fast enough. If not, it dies.
 	
 	final int AMOUNT_OF_ANT_ACTIONS = 5;
-	String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS + 1];
-	String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS + 1];
+	String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//Array of the ants formed from crossover.
+	String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//
 	
 	Textures t = new Textures();
 
@@ -51,24 +51,24 @@ public class Driver {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}*/
-		
+
+		//Creates board tiles and initial ants.
 		genTiles();
 		genAnts();
 				
 		boolean isDone = false;
 		
-		int antIndex = 0;
+		int antIndex = 0;	//Which ant in the list of ants are we currenlty messing with.
 		ant = ants.get(antIndex);
-		visitCenterTile();
+		visitCenterTile();	//Quick fix to make the starting tile "visited"
 		
-		while (!Display.isCloseRequested() && isDone == false)
+		while (!Display.isCloseRequested() && isDone == false)		//Runs until simulation is terminated, or finished.
 		{
 			//Keeps images from staying on screen.
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		
-			
-			
-			
+
+
+            //Checks if ant has made significant progress, or if it should just be killed instead of finishing its run.
 			if (sameTileCount != visitedTiles)
 			{
 				noProgressCount = 0;
@@ -84,36 +84,40 @@ public class Driver {
 				stepsTaken = maxNumOfSteps-1;
 				//System.out.println("KILLED FOR NO PROGRESS");
 			}
-			
-			
-			
-			
+
+
+			//Basically just updates the tiles and keeps them drawn.
+            //Looks kinda funny if you comment out the update line.
 			for (int i = 0; i < tiles.size(); i++)
 			{
 				tiles.get(i).update();
 			}
 			
-			checkTile(ant);
+			checkTile(ant); //calls the method that does all of the actions regarding the ant and tiles.
 			
-			ant.update();
+			ant.update();   //draws the ant and such...
 			stepsTaken++;
-			
+
+            //Checks if this ants turn is done.
 			if (stepsTaken == maxNumOfSteps || ant.isOffBoard() == true)
 			{			
-				//Last ant in batch to check.
+				//Last ant in generation to check.
 				if (antIndex == ants.size()-1)
 				{
-					if (generation == lastGeneration)
+                    //Last generation to check.
+					if (currGeneration == lastGeneration)
 					{
 						isDone = true;
 					}
-					generation++;
-					ant.setScore(getVisitedTiles());
+                    currGeneration++;
+					ant.setScore(getVisitedTiles());    //Gives ant its fitness score.
 					averageFitness += ant.getFitness();
 					System.out.println();
-					System.out.println("GENERATION: " + generation);
+					System.out.println("GENERATION: " + currGeneration);
 					System.out.println("AVERGAE FITNESS: " + averageFitness/ants.size());
-					generateNextAnts();
+
+                    //Resets everything for next run.
+                    generateNextAnts();
 					averageFitness = 0;
 					stepsTaken = 0;
 					restartTiles();
@@ -138,14 +142,16 @@ public class Driver {
 				visitedTiles = 1;
 				sameTileCount = 0;
 			}
-		
+
 			Display.update();
-			Display.sync(100);
+			Display.sync(100);  //Basically this is the speed of the simulation
 		}
 		
-		Display.destroy();
+		Display.destroy();  //Destorys the GUI
  	}
-	
+
+
+
 	private void generateNextAnts()
 	{
 		System.out.println();
@@ -268,8 +274,13 @@ public class Driver {
 		}
 		System.out.println("================");
 	}
-	
-	
+
+
+    /**
+     * Takes in two ants and a random number.
+     * It will cut the ant's arrays of moves and colors up and mix them together to
+     * do the crossover.
+     */
 	private void genMoveList(Ant a, Ant b, int slicer)
 	{
 		String[] aMoves = a.getMoves(slicer, true);
@@ -313,8 +324,12 @@ public class Driver {
 			tiles.get(i).unvist();
 		}
 	}
-	
-	
+
+    /**
+     * Narrows down what tile the ant is on, checks the color of the tile,
+     * sees what the ant should do when on that color,
+     * does the action, changes the tile to the color specified by the ant.
+     */
 	private void checkTile(Ant ant)
 	{
 		for (int i = 0; i < tiles.size(); i++)
@@ -344,15 +359,12 @@ public class Driver {
 				count++;
 			}
 		}
-		/*System.out.println("========================");
-		System.out.println(count + " tiles visited.");
-		System.out.println(stepsTaken + " steps taken.");
-		System.out.println((float)count/(float)numTiles * 100 + "% of board explored");
-		getMoveList();
-		System.out.println("========================");*/
 		return((float)count/(float)numTiles * 100);
 	}
-	
+
+    /**
+     * Not needed, but shows the moves and or colors of all this ants in the generation.
+     */
 	private static void getMoveList()
 	{
 		System.out.println();
@@ -425,42 +437,16 @@ public class Driver {
 			
 			antsToMake--;
 		}
-		
-		//Black & Blue
-//		String[] colorIn = {"white","black","blue","green","yellow","red"};
-//		String[] moves= {"turn clockwise","turn counter clockwise","move right","move backward","move left","move forward"};
-//		String[] colorOut = {"red","white","black","white","black","blue"};
-		
-		//Long Green Symmetry
-//		String[] colorIn = {"red","blue","green","white","black","yellow"};
-//		String[] moves= {"turn clockwise","turn counter clockwise","move right","move backward","move left","move backward"};
-//		String[] colorOut = {"green","yellow","blue","green","white","green"};
-		
-		//Blue/Yellow Diamond
-//    	String[] colorIn = {"red","blue","green","white","black","yellow"};
-//		String[] moves= {"turn clockwise","turn counter clockwise","move left","move backward","move left","move forward"};
-//		String[] colorOut = {"green","red","blue","yellow","white","green"};
-		
-		//Blue/Black Line
-//		String[] colorIn = {"red","blue","green","white","black","yellow"};
-//		String[] moves= {"turn counter clockwise","turn clockwise","move right","move backward","move left","move forward"};
-//		String[] colorOut = {"red","green","blue","black","green","white"};
-		
-		//Nice Colors, but no real pattern
-//		String[] colorIn = {"red","blue","green","white","black","yellow"};
-//		String[] moves= {"turn counter clockwise","turn clockwise","move right","move backward","move left","move forward"};
-//		String[] colorOut = {"black","yellow","red","blue","green","green"};
-
-		//Square..?
-//		String[] colorIn = {"red","green","yellow","black","blue","white"};
-//		String[] moves= {"turn clockwise","turn counter clockwise","move backward","move forward","move left","move right"};
-//		String[] colorOut = {"black","yellow","white","red","green","blue"};
 	}
-	
+
+    /**
+     * Called from another class to add 1 to the count of tiles that are visited.
+     */
 	public static void addOneTile()
 	{
 		visitedTiles++;
 	}
+
 	
 	private void genTiles()
 	{
