@@ -20,24 +20,22 @@ public class Driver {
 	int halfOfBoardWidth = ((WINDOW_WIDTH/TILE_SIZE)/2) * TILE_SIZE;
 	final int OFFSET = 1;	//This is used to make the tiles and the ants look nicely dispersed.
 	final int SPEED = 20;	//The amount of distance the ant goes each step. Basically the TILE_SIZE
-	static int stepsTaken = 0;	//Amount of steps an ant takes in a round.
+	static int stepsTaken = 0;	//Count of amount of steps an ant takes in a round.
 	static Ant ant;	//Represents the ant currently being active.
 	String[] colorList = {"white","black","blue","green","yellow","red"};	//Basic list of colors for an ant to recieve.
 	private ArrayList<Ant> ants = new ArrayList<>();	//Holds the ants of the current generation.
 	private int currGeneration = 0;	//Current generation number.
-	private int lastGeneration = 0; //This is the last generation wanted - 1. EX: gen. 10 = 9
+	private int lastGeneration = 100; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
 	int numOfAntsNeeded = 10;	//Number of ants per generation.
-	int maxNumOfSteps = 100;	//Maximum amount of steps an ant can take before it dies.
+	int maxNumOfSteps = 3000;	//Maximum amount of steps an ant can take before it dies.
 	float averageFitness = 0;	//Total fitness throughout a generation.
 	static int visitedTiles = 1;	//Number of tiles touched so far.
 	int sameTileCount = 0; 	//Counter to see if ant has made any progress.
 	int noProgressCount = 0;	//Used to see if an ant is making progess fast enough. If not, it dies.
 	
 	final int AMOUNT_OF_ANT_ACTIONS = 5;
-	String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//Array of the ants formed from crossover.
-	String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//
 	
 	Textures t = new Textures();
 
@@ -73,7 +71,6 @@ public class Driver {
 			{
 				noProgressCount = 0;
 				sameTileCount = visitedTiles;
-				//System.out.println("RESET!");
 			}
 			else
 			{
@@ -82,7 +79,6 @@ public class Driver {
 			if (noProgressCount >= visitedTiles*4)	//Number of moves they can make before needing to add a new tile.
 			{
 				stepsTaken = maxNumOfSteps-1;
-				//System.out.println("KILLED FOR NO PROGRESS");
 			}
 
 
@@ -115,6 +111,7 @@ public class Driver {
 					System.out.println();
 					System.out.println("GENERATION: " + currGeneration);
 					System.out.println("AVERGAE FITNESS: " + averageFitness/ants.size());
+                    getScore();
 
                     //Resets everything for next run.
                     generateNextAnts();
@@ -154,17 +151,6 @@ public class Driver {
 
 	private void generateNextAnts()
 	{
-		System.out.println();
-		System.out.println("OLD ANTS\n");
-		for (int i = 0; i < ants.size(); i++)
-		{
-			System.out.println("FITNESS: " + ants.get(i).getFitness());
-			for (int j = 0; j < ants.get(i).colorOut.length; j++)
-			{
-				System.out.print(ants.get(i).colorOut[j] + ", ");
-			}
-			System.out.println();
-		}
 		//Selecting the best from the current generation.
 		ArrayList<Ant> tmp = new ArrayList<>();
 		averageFitness = averageFitness/ants.size();
@@ -186,17 +172,6 @@ public class Driver {
 		
 		//Adding new ants to fill the places of the old failing ants.
 		genAnts();
-		
-		System.out.println("\nNEW ANTS\n");
-		for (int i = 0; i < ants.size(); i++)
-		{
-			for (int j = 0; j < ants.get(i).colorOut.length; j++)
-			{
-				System.out.print("ANT #" + i + " " + ants.get(i).colorOut[j] + ", ");
-			}
-			System.out.println();
-		}
-		System.out.println("\n\n");
 	}
 	
 	
@@ -220,22 +195,21 @@ public class Driver {
 	 */
 	private void crossOver()
 	{
-		System.out.println();
-		System.out.println("DOING CROSSOVER");
 		Random rgen = new Random();
 		ArrayList<Ant> tmp = new ArrayList<>();
 		int slicer = 0;
 		
 		int offset = ants.size() % 2; //Stops it from trying to cross with an odd amount of ants.
-		
+
 		boolean firstParent = true;
 		
 		for (int i = 0; i < ants.size(); i++)
 		{
+            String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//Array of the ants formed from crossover.
+            String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//
 			//Last ant that passed the test. Odd amount so instead of crossover, he is just added in.
 			if (offset > 0 && i == ants.size()-1)
 			{
-				System.out.println("ADDING OLD ANT");
 				tmp.add(ants.get(i));
 			}
 			//This will happen every time except possibly once at the end.
@@ -244,35 +218,19 @@ public class Driver {
 				slicer = rgen.nextInt(AMOUNT_OF_ANT_ACTIONS) + 1;
 				if (firstParent == true)
 				{
-					genMoveList(ants.get(i), ants.get(i+1),slicer);
+					genMoveList(ants.get(i), ants.get(i+1),slicer, crossedMoves, crossedColors);
 					firstParent = false;
 				}
 				else
 				{
-					genMoveList(ants.get(i), ants.get(i-1),slicer);
+					genMoveList(ants.get(i), ants.get(i-1),slicer, crossedMoves, crossedColors);
 					firstParent = true;
 				}
 				Ant a = new Ant(halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
-				System.out.println("NEW BABY COLORS");
-				for (int t = 0; t < a.colorOut.length; t++)
-				{
-					System.out.print(a.colorOut[t] + ", ");
-				}
-				System.out.println();
 				tmp.add(a);
 			}
 		}
 		ants = tmp;
-		System.out.println("================");
-		for (int i = 0; i < ants.size(); i++)
-		{
-			for (int j = 0; j < ants.get(i).colorOut.length; j++)
-			{
-				System.out.print("ANT #" + i + " " + ants.get(i).colorOut[j] + ", ");
-			}
-			System.out.println();
-		}
-		System.out.println("================");
 	}
 
 
@@ -281,13 +239,13 @@ public class Driver {
      * It will cut the ant's arrays of moves and colors up and mix them together to
      * do the crossover.
      */
-	private void genMoveList(Ant a, Ant b, int slicer)
+	private void genMoveList(Ant a, Ant b, int slicer, String[] crossedMoves, String[] crossedColors)
 	{
 		String[] aMoves = a.getMoves(slicer, true);
 		String[] aColors = a.getColors(slicer, true);
 		String[] bMoves = b.getMoves(slicer, false);
 		String[] bColors = b.getColors(slicer, false);
-		
+
 		int x = 0;
 		for (int i = 0; i < aMoves.length; i++)
 		{
@@ -361,6 +319,21 @@ public class Driver {
 		}
 		return((float)count/(float)numTiles * 100);
 	}
+
+
+	private void getScore()
+    {
+        float highScore = 0;
+        for (int i = 0; i < ants.size(); i++)
+        {
+            if (ants.get(i).getFitness() > highScore)
+            {
+                highScore = ants.get(i).getFitness();
+            }
+        }
+        System.out.println("BEST SCORE: " + highScore);
+    }
+
 
     /**
      * Not needed, but shows the moves and or colors of all this ants in the generation.

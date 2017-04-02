@@ -130,7 +130,7 @@ public class Ant {
 		}
 		else
 		{
-			newColors = new String[colorIn.length - sliceSpot];
+			newColors = new String[colorOut.length - sliceSpot];
 			int x = 0;
 			for (int i = sliceSpot; i < colorOut.length; i++)
 			{
