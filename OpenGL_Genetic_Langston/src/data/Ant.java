@@ -108,6 +108,7 @@ public class Ant {
 		{
 			newMoves = new String[moves.length - sliceSpot];
 			int x = 0;
+            System.out.println("THIS THING TOM: " + moves.length);
 			for (int i = sliceSpot; i < moves.length; i++)
 			{
 				newMoves[x] = moves[i];
@@ -178,6 +179,46 @@ public class Ant {
 			rotateCounterClockwise();
 			move();
 		}
+		else if (action.equals("diaganol up right"))
+		{
+            x += speed;
+            y -= speed;
+		}
+		else if (action.equals("diaganol down right"))
+		{
+            x += speed;
+            y += speed;
+		}
+		else if (action.equals("diaganol up left"))
+		{
+            x -= speed;
+            y -= speed;
+		}
+		else if (action.equals("diaganol down left"))
+		{
+            x -= speed;
+            y += speed;
+		}
+		else if (action.equals("skip up"))
+        {
+            y -= speed * 2;
+        }
+        else if (action.equals("skip down"))
+        {
+            y += speed * 2;
+        }
+        else if (action.equals("skip right"))
+        {
+            x += speed * 2;
+        }
+        else if (action.equals("skip left"))
+        {
+            x -= speed * 2;
+        }
+        else if (action.equals("dont move"))
+        {
+            //do nothing.
+        }
 	}
 	
 	//This outputs the color to change to from an index.

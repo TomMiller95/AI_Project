@@ -25,7 +25,7 @@ public class Driver {
 	String[] colorList = {"white","black","blue","green","yellow","red"};	//Basic list of colors for an ant to recieve.
 	private ArrayList<Ant> ants = new ArrayList<>();	//Holds the ants of the current generation.
 	private int currGeneration = 0;	//Current generation number.
-	private int lastGeneration = 100; //This is the last generation wanted - 1. EX: gen. 10 = 9
+	private int lastGeneration = 4; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
 	int numOfAntsNeeded = 10;	//Number of ants per generation.
@@ -34,9 +34,7 @@ public class Driver {
 	static int visitedTiles = 1;	//Number of tiles touched so far.
 	int sameTileCount = 0; 	//Counter to see if ant has made any progress.
 	int noProgressCount = 0;	//Used to see if an ant is making progess fast enough. If not, it dies.
-	
-	final int AMOUNT_OF_ANT_ACTIONS = 5;
-	
+	final int AMOUNT_OF_ANT_ACTIONS = colorList.length;
 	Textures t = new Textures();
 
 	public Driver()
@@ -154,6 +152,7 @@ public class Driver {
 		//Selecting the best from the current generation.
 		ArrayList<Ant> tmp = new ArrayList<>();
 		averageFitness = averageFitness/ants.size();
+        Ant tmpAnt = null; //used if only one ant passes the fitness eval.
 		
 		for (Ant a : ants)
 		{
@@ -162,9 +161,15 @@ public class Driver {
 			if (a.getFitness() > averageFitness)
 			{
 				tmp.add(a);
+                tmpAnt = a;
 			}
 		}
-		
+
+        //This should probably change because its just creating the same ants.
+		if (ants.size() == 1)
+        {
+            tmp.add(tmpAnt);
+        }
 		
 		numOfAntsNeeded = ants.size() - tmp.size();	//Figures out how many new ants we need to make.
 		ants = tmp;
@@ -205,8 +210,8 @@ public class Driver {
 		
 		for (int i = 0; i < ants.size(); i++)
 		{
-            String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//Array of the ants formed from crossover.
-            String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS + 1];	//
+            String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS];	//Array of the ants formed from crossover.
+            String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS];	//
 			//Last ant that passed the test. Odd amount so instead of crossover, he is just added in.
 			if (offset > 0 && i == ants.size()-1)
 			{
@@ -215,7 +220,7 @@ public class Driver {
 			//This will happen every time except possibly once at the end.
 			else
 			{
-				slicer = rgen.nextInt(AMOUNT_OF_ANT_ACTIONS) + 1;
+				slicer = rgen.nextInt(AMOUNT_OF_ANT_ACTIONS) + 1; //make the colors have a higher chance to be selected if they are used
 				if (firstParent == true)
 				{
 					genMoveList(ants.get(i), ants.get(i+1),slicer, crossedMoves, crossedColors);
@@ -241,10 +246,24 @@ public class Driver {
      */
 	private void genMoveList(Ant a, Ant b, int slicer, String[] crossedMoves, String[] crossedColors)
 	{
+        System.out.println("CROSS OVER");
 		String[] aMoves = a.getMoves(slicer, true);
 		String[] aColors = a.getColors(slicer, true);
 		String[] bMoves = b.getMoves(slicer, false);
 		String[] bColors = b.getColors(slicer, false);
+        System.out.println("ANT A MOVES");
+        for (int i = 0; i < aMoves.length; i++)
+        {
+            System.out.print(aMoves[i] + ", ");
+        }
+        System.out.println();
+        System.out.println("ANT B MOVES");
+        for (int i = 0; i < bMoves.length; i++)
+        {
+            System.out.print(bMoves[i] + ", " );
+        }
+        System.out.println();
+
 
 		int x = 0;
 		for (int i = 0; i < aMoves.length; i++)
@@ -269,6 +288,13 @@ public class Driver {
 			crossedColors[x] = bColors[i];
 			x++;
 		}
+
+		System.out.println("CROSSED MOVES");
+        for (int i = 0; i < crossedMoves.length; i++)
+        {
+            System.out.print(crossedMoves[i] + ", " );
+        }
+        System.out.println();
 	}
 	
 	
@@ -341,17 +367,17 @@ public class Driver {
 	private static void getMoveList()
 	{
 		System.out.println();
-		for (int i = 0; i < ant.moves.length; i ++)
+		for (int i = 0; i < ant.colorIn.length; i ++)
 		{
-			System.out.print(ant.colorIn[i] + ", ");
+			//System.out.print(ant.colorIn[i] + ", ");
 		}
 		System.out.println();
-		for (int i = 0; i < ant.moves.length; i ++)
+		for (int i = 0; i < ant.colorIn.length; i ++)
 		{
-			System.out.print(ant.moves[i] + ", ");
+			//System.out.print(ant.moves[i] + ", ");
 		}
 		System.out.println();
-		for (int i = 0; i < ant.moves.length; i ++)
+		for (int i = 0; i < ant.colorIn.length; i ++)
 		{
 			System.out.print(ant.colorOut[i] + ", ");
 		}
@@ -369,26 +395,36 @@ public class Driver {
 	private void genAnts()
 	{
 		int antsToMake = numOfAntsNeeded;
-		
-		while (antsToMake > 0)
+        ArrayList<String> colorOutList = new ArrayList<>();
+        colorOutList.add("white");
+        colorOutList.add("black");
+        colorOutList.add("blue");
+        colorOutList.add("green");
+        colorOutList.add("yellow");
+        colorOutList.add("red");
+
+        ArrayList<String> moveList = new ArrayList<>();
+        moveList.add("turn clockwise");
+        moveList.add("turn counter clockwise");
+        moveList.add("move right");
+        moveList.add("move backward");
+        moveList.add("move left");
+        moveList.add("move forward");
+        moveList.add("diaganol up right");
+        moveList.add("diaganol up left");
+        moveList.add("diaganol down right");
+        moveList.add("diaganol down left");
+        moveList.add("skip up");
+        moveList.add("skip down");
+        moveList.add("skip left");
+        moveList.add("skip right");
+        moveList.add("dont move");
+
+
+        while (antsToMake > 0)
 		{
-			ArrayList<String> colorOutList = new ArrayList<>();
-			colorOutList.add("white");
-			colorOutList.add("black");
-			colorOutList.add("blue");
-			colorOutList.add("green");
-			colorOutList.add("yellow");
-			colorOutList.add("red");
-			
-			ArrayList<String> moveList = new ArrayList<>();
-			moveList.add("turn clockwise");
-			moveList.add("turn counter clockwise");
-			moveList.add("move right");
-			moveList.add("move backward");
-			moveList.add("move left");
-			moveList.add("move forward");
-			
-			String[] moves = new String[moveList.size()];
+            System.out.println("NEW ANT MADE");
+			String[] moves = new String[colorList.length];
 			String[] colorOut = new String[colorList.length];
 			
 			Random rgen = new Random();
