@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Artist {
 
-	public static final int WIDTH = 640, HEIGHT = 640;
+	public static final int WIDTH = 600, HEIGHT = 600;
 	public static void BeginSession()
 	{
 		Display.setTitle("Langston's Ant"); 
@@ -53,28 +53,5 @@ public class Artist {
 		glVertex2f(0, height);
 		glEnd();
 		glLoadIdentity();
-	}
-
-	
-	public static Texture LoadTexture(String path, String fileType)
-	{
-		Texture tex = null;
-		InputStream in = ResourceLoader.getResourceAsStream(path);
-		try
-		{
-			tex = TextureLoader.getTexture(fileType, in);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		return tex;
-	}
-	
-	public static Texture quickLoad(String name)
-	{
-		Texture tex = null;
-		tex = LoadTexture("res/" + name + ".png", "PNG");
-		return tex;
 	}
 }

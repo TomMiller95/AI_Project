@@ -1,6 +1,7 @@
 package data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.newdawn.slick.opengl.Texture;
 
@@ -16,7 +17,15 @@ public class Ant {
 	public String[] colorIn;
 	public String[] moves;
 	public String[] colorOut;
-	
+	private HashMap<String,Integer> colorsUsed = new HashMap<>();
+    Ant parentA, parentB;
+
+    //Constructor for bestAnt.
+    public Ant(int score)
+    {
+        this.fitness = score;
+    }
+
 	//Takes a color in from current tile, moves depending on color, changes that tile to new color.
 	public Ant(float x, float y, float height, float width, Texture tex, String direction, int speed, String[] colorIn, String[] moves, String[] colorOut)
 	{
@@ -30,12 +39,19 @@ public class Ant {
 		this.colorIn = colorIn;
 		this.moves = moves;
 		this.colorOut = colorOut;
+
+
+        for (int i = 0; i < colorIn.length; i++)
+        {
+            colorsUsed.put(colorIn[i],0);
+        }
 	}
 
 	private void draw()
 	{
 		Artist.DrawQuadTex(tex, x, y, height, width);
 	}
+
 	public void setX(float x)
 	{
 		this.x = x;
@@ -50,16 +66,79 @@ public class Ant {
 	public float getY() {
 		return y;
 	}
+
+
 	public void changeTexture(Texture newTexture)
 	{
 		tex = newTexture;
 	}
-	
-	
+
+
+	public void setParents(Ant parA, Ant parB)
+    {
+        parentA = parA;
+        parentB = parB;
+    }
+
+	public void getParentInfo()
+    {
+        if (parentA == null || parentB == null)
+        {
+            System.out.println("This ant has no parents, but here are its moves anyway: ");
+        }
+        else
+        {
+            System.out.println("PARENT A MOVES AND COLOR OUTS: ");
+            for (int i = 0; i < parentA.moves.length; i++)
+            {
+                System.out.print(parentA.moves[i] + ", ");
+            }
+            System.out.println();
+            for (int i = 0; i < parentA.colorOut.length; i++)
+            {
+                System.out.print(parentA.colorOut[i] + ", ");
+            }
+            System.out.println();
+
+            System.out.println("PARENT B MOVES AND COLOR OUTS: ");
+            for (int i = 0; i < parentB.moves.length; i++)
+            {
+                System.out.print(parentB.moves[i] + ", ");
+            }
+            System.out.println();
+            for (int i = 0; i < parentB.colorOut.length; i++)
+            {
+                System.out.print(parentB.colorOut[i] + ", ");
+            }
+            System.out.println();
+
+        }
+        System.out.println("CHILD ANT MOVES AND COLOR OUTS: ");
+        for (int i = 0; i < moves.length; i++)
+        {
+            System.out.print(moves[i] + ", ");
+        }
+        System.out.println();
+        for (int i = 0; i < colorOut.length; i++)
+        {
+            System.out.print(colorOut[i] + ", ");
+        }
+        System.out.println();
+    }
 	
 
-	
-	
+	//For mutation, swaps random two
+    public void swap(int in1, int in2)
+    {
+        String tmp;
+        tmp = colorOut[in1];
+        colorOut[in1] = colorOut[in2];
+        colorOut[in2] = tmp;
+
+        tmp = moves[in1];
+        moves[in1] = moves[in2];
+        moves[in2] = tmp;
+    }
 	
 	//This will output the index number of the given tile color.
 	public int onTile(String color)
@@ -68,6 +147,7 @@ public class Ant {
 		{
 			if (colorIn[i].equals(color))
 			{
+                colorsUsed.put(colorOut[i],colorsUsed.get(colorOut[i]) + 1);
 				return i;
 			}
 		}
@@ -108,7 +188,6 @@ public class Ant {
 		{
 			newMoves = new String[moves.length - sliceSpot];
 			int x = 0;
-            System.out.println("THIS THING TOM: " + moves.length);
 			for (int i = sliceSpot; i < moves.length; i++)
 			{
 				newMoves[x] = moves[i];
@@ -142,7 +221,24 @@ public class Ant {
 		return newColors;
 	}
 	
-	
+
+
+
+	public int getSliceSpot()
+    {
+        int max = 0;
+        int index = 0;
+        for (int i = 0; i < colorIn.length; i++)
+        {
+            //System.out.println("COLOR USED: " + colorsUsed.get(colorIn[i]));
+            if (colorsUsed.get(colorIn[i]) > max)
+            {
+                max = colorsUsed.get(colorIn[i]);
+                index = i;
+            }
+        }
+        return index;
+    }
 	
 	
 	
@@ -336,7 +432,15 @@ public class Ant {
 	
 	public void setScore(float score)
 	{
-		fitness = score;
+		fitness = score;    //Scores off of just board completion.
+
+        for (int i = 0; i < colorIn.length-1; i++)
+        {
+            if (colorsUsed.get(colorIn[i]) > 0)
+            {
+                fitness += 5;   //Scores off of colors used.
+            }
+        }
 	}
 	
 	public float getFitness()
