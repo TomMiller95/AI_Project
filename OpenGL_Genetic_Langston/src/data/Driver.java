@@ -43,7 +43,9 @@ public class Driver {
 	{
 		BeginSession();
 		t.load();
-		
+
+		//Future idea will be to feed the program an image, and the image will be broken down into the tiles on the board, and
+		//	the ants will try to make the picture.
 		/*try {
 			PixelMachine p = new PixelMachine();
 		} catch (IOException e) {
@@ -54,7 +56,7 @@ public class Driver {
 		genTiles();
 		genAnts();
 				
-		boolean isDone = false;
+		boolean isDone = false; //True when the program is done.
 		
 		int antIndex = 0;	//Which ant in the list of ants are we currently messing with.
 		ant = ants.get(antIndex); //Selects the ant to simulate.
@@ -100,12 +102,6 @@ public class Driver {
             //Checks if this ants turn is done.
 			if (stepsTaken == maxNumOfSteps || ant.isOffBoard() == true)
 			{
-                /*
-                System.out.println("======================================================");
-                ant.getParentInfo();
-                System.out.println("======================================================");
-                */
-
 				//Last ant in generation to check.
 				if (antIndex == ants.size()-1)
 				{
@@ -123,7 +119,6 @@ public class Driver {
 						System.out.println("GENERATION: " + currGeneration);
 					}
 					System.out.println("AVERGAE FITNESS: " + averageFitness/ants.size());
-                    //getScore();
 
                     //Resets everything for next run.
                     generateNextAnts();
@@ -134,6 +129,7 @@ public class Driver {
 					ant = ants.get(antIndex);
 					ant.resetOrientation();
 					visitCenterTile();
+                    //
 				}
 				else
 				{
@@ -154,20 +150,15 @@ public class Driver {
 					restartTiles();
 					visitCenterTile();
 				}
-				//getMoveList();
 				noProgressCount = 0;
 				visitedTiles = 1;
 				sameTileCount = 0;
-                /*System.out.println("======================================================");
-                System.out.println(bestAnt.getFitness());
-                System.out.println("======================================================");*/
 			}
 
 			Display.update();
 			Display.sync(100);  //Basically this is the speed of the simulation
 		}
         System.out.println("======================================================");
-        //bestAnt.getParentInfo();
         System.out.println("FINAL BEST FITNESS SCORE: " + bestAnt.getFitness());
         System.out.println("======================================================");
 		Display.destroy();  //Destorys the GUI
@@ -218,54 +209,46 @@ public class Driver {
 		int slicer;
         Ant mom, dad;
 
-        //MIGHT NOT NEED NOW.
-		int offset = ants.size() % 2; //Stops it from trying to cross with an odd amount of ants.
-
 		boolean firstParent = true; //Determines whether to make parent B the next ant or previous ant.
 		
 		for (int i = 0; i < ants.size(); i++)
 		{
             String[] crossedColors = new String[AMOUNT_OF_ANT_ACTIONS];	//Array of the ants formed from crossover.
             String[] crossedMoves = new String[AMOUNT_OF_ANT_ACTIONS];	//
-			//Last ant that passed the test. Odd amount so instead of crossover, he is just added in.
-			if (offset > 0 && i == ants.size()-1)
-			{
-                //System.out.println("THIS SHOULD NOT HAPPEN ANYMORE");
-				//tmp.add(ants.get(i));
-			}
-			else //This should happen every .
-			{
-                //Slicer gets the index of the most used color in the ants move list.
-                //This will make sure it passes good DNA
-				slicer = ants.get(i).getSliceSpot();
 
-                if (firstParent == true)
-				{
-                    mom = ants.get(i);
-                    dad = ants.get(i+1);
-					genMoveList(mom, dad,slicer, crossedMoves, crossedColors);
-					firstParent = false;
-				}
-				else
-				{
-                    mom = ants.get(i);
-                    dad = ants.get(i-1);
-					genMoveList(mom, dad,slicer, crossedMoves, crossedColors);
-					firstParent = true;
-				}
+            //This will make sure it passes good DNA which will speed up the process.
+            //Could randomly generate this number to make it more random, but will slow down results.
+            slicer = ants.get(i).getSliceSpot();
 
-				Ant a = new Ant(halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
-                a.setParents(mom,dad);
+            if (firstParent == true)
+            {
+                mom = ants.get(i);
+                dad = ants.get(i+1);
+                genMoveList(mom, dad,slicer, crossedMoves, crossedColors);
+                firstParent = false;
+            }
+            else
+            {
+                mom = ants.get(i);
+                dad = ants.get(i-1);
+                genMoveList(mom, dad,slicer, crossedMoves, crossedColors);
+                firstParent = true;
+            }
 
-                //Adding mutation to ants here
-                int shouldMutate = rgen.nextInt(100);
-                if (shouldMutate <= 1)	//1% chance
-                {
-                    System.out.println("MUTATION OCCURED");
-                    a = mutate(a);
-                }
-                tmp.add(a);
-			}
+            //New ant with crossover implemented.
+            Ant a = new Ant(halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
+            a.setParents(mom,dad);
+
+            //Adding mutation to ants here
+            final int MUTATION_CHANCE = 100;    //Change this to make mutation occur more or less.
+
+            int shouldMutate = rgen.nextInt(MUTATION_CHANCE);
+            if (shouldMutate <= 1)	//1% chance
+            {
+                //System.out.println("MUTATION OCCURED");
+                a = mutate(a);
+            }
+            tmp.add(a);
 		}
 		ants = tmp;
 	}
@@ -280,12 +263,13 @@ public class Driver {
      */
 	private void genMoveList(Ant a, Ant b, int slicer, String[] crossedMoves, String[] crossedColors)
 	{
-        //System.out.println("CROSSOVER " + slicer);
-		String[] aMoves = a.getMoves(slicer, true);
+        //Taking the parent DNAs and getting ready for crossover.
+        String[] aMoves = a.getMoves(slicer, true);
 		String[] aColors = a.getColors(slicer, true);
 		String[] bMoves = b.getMoves(slicer, false);
 		String[] bColors = b.getColors(slicer, false);
 
+        //Adding the parent DNA into the array of the childs DNA.
 		int x = 0;
 		for (int i = 0; i < aMoves.length; i++)
 		{
@@ -315,6 +299,8 @@ public class Driver {
     {
         int index1 = 0;
         int index2 = 0;
+        //Quick loop to make sure mutated indices don't pick the same DNA strand, which would basically do nothing, since
+        //  we would be replacing the DNA with itself.
         while (index1 == index2)
         {
             index1 = rgen.nextInt(colorList.length);
@@ -388,6 +374,7 @@ public class Driver {
 	}
 
 
+	//Mostly used for tsting.
 	private void getScore()
     {
         float highScore = 0;
@@ -464,6 +451,7 @@ public class Driver {
         ArrayList<String> moveList = new ArrayList<>();
         moveList.add("turn clockwise");
         moveList.add("turn counter clockwise");
+        moveList.add("turn around");
         moveList.add("move right");
         moveList.add("move backward");
         moveList.add("move left");

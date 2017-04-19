@@ -49,7 +49,7 @@ public class Ant {
 
 	private void draw()
 	{
-		//Artist.DrawQuadTex(tex, x, y, height, width);
+		Artist.DrawQuadTex(tex, x, y, height, width);
 	}
 
 	public void setX(float x)
@@ -253,6 +253,11 @@ public class Ant {
 		}
 		else if (action.equals("turn clockwise"))
 		{
+			rotateClockwise();
+		}
+		else if (action.equals("turn around"))
+		{
+			rotateClockwise();
 			rotateClockwise();
 		}
 		else if (action.equals("move forward"))
