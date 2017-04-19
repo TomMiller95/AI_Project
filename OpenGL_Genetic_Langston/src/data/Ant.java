@@ -49,7 +49,7 @@ public class Ant {
 
 	private void draw()
 	{
-		Artist.DrawQuadTex(tex, x, y, height, width);
+		//Artist.DrawQuadTex(tex, x, y, height, width);
 	}
 
 	public void setX(float x)

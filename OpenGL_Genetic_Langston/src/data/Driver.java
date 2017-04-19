@@ -61,6 +61,8 @@ public class Driver {
 
 		visitCenterTile();	//Quick fix to make the starting tile "visited".
 		
+		System.out.println("GENERATION: 0");
+		
 		while (!Display.isCloseRequested() && isDone == false)		//Runs until simulation is terminated, or finished.
 		{
 			//Keeps images from staying on screen.
@@ -116,7 +118,10 @@ public class Driver {
 					ant.setScore(getVisitedTiles());    //Gives ant its fitness score.
 					averageFitness += ant.getFitness();
 					System.out.println();
-					System.out.println("GENERATION: " + currGeneration);
+					if (currGeneration != lastGeneration)
+					{
+						System.out.println("GENERATION: " + currGeneration);
+					}
 					System.out.println("AVERGAE FITNESS: " + averageFitness/ants.size());
                     //getScore();
 
@@ -137,7 +142,7 @@ public class Driver {
                     {
                         bestAnt = ant;
                         System.out.println("======================================================");
-                        System.out.println(bestAnt.getFitness());
+                        System.out.println("NEWEST BEST FITNESS SCORE: " + bestAnt.getFitness());
                         bestAnt.getParentInfo();
                         System.out.println("======================================================");
                     }
@@ -162,7 +167,8 @@ public class Driver {
 			Display.sync(100);  //Basically this is the speed of the simulation
 		}
         System.out.println("======================================================");
-        bestAnt.getParentInfo();
+        //bestAnt.getParentInfo();
+        System.out.println("FINAL BEST FITNESS SCORE: " + bestAnt.getFitness());
         System.out.println("======================================================");
 		Display.destroy();  //Destorys the GUI
  	}
@@ -224,8 +230,8 @@ public class Driver {
 			//Last ant that passed the test. Odd amount so instead of crossover, he is just added in.
 			if (offset > 0 && i == ants.size()-1)
 			{
-                System.out.println("THIS SHOULD NOT HAPPEN ANYMORE");
-				tmp.add(ants.get(i));
+                //System.out.println("THIS SHOULD NOT HAPPEN ANYMORE");
+				//tmp.add(ants.get(i));
 			}
 			else //This should happen every .
 			{
@@ -253,9 +259,9 @@ public class Driver {
 
                 //Adding mutation to ants here
                 int shouldMutate = rgen.nextInt(100);
-                if (shouldMutate <= 3)
+                if (shouldMutate <= 1)	//1% chance
                 {
-                    System.out.println("MUTATE");
+                    System.out.println("MUTATION OCCURED");
                     a = mutate(a);
                 }
                 tmp.add(a);
