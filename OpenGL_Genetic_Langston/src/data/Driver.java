@@ -3,6 +3,7 @@ package data;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.lwjgl.Sys;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
@@ -28,7 +29,7 @@ public class Driver {
 	private int lastGeneration = 99; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
-	int numOfAntsNeeded = 10;	//Number of ants per generation.
+	int numOfAntsNeeded = 100;	//Number of ants per generation.
 	int maxNumOfSteps = 10000;	//Maximum amount of steps an ant can take before it dies.
 	float averageFitness = 0;	//Total fitness throughout a generation.
 	static int visitedTiles = 1;	//Number of tiles touched so far.
@@ -39,130 +40,176 @@ public class Driver {
     Random rgen = new Random();
     Ant bestAnt = new Ant(0);  //The ant with the highest score.
 
-	public Driver()
-	{
-		BeginSession();
-		t.load();
+    int id = 0;
+    Ant[] ancestors;
 
-		//Future idea will be to feed the program an image, and the image will be broken down into the tiles on the board, and
-		//	the ants will try to make the picture.
+
+    public Driver() {
+        BeginSession();
+        t.load();
+
+        //Future idea will be to feed the program an image, and the image will be broken down into the tiles on the board, and
+        //	the ants will try to make the picture.
 		/*try {
 			PixelMachine p = new PixelMachine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}*/
 
-		//Creates board tiles and initial ants.
-		genTiles();
-		genAnts();
-				
-		boolean isDone = false; //True when the program is done.
-		
-		int antIndex = 0;	//Which ant in the list of ants are we currently messing with.
-		ant = ants.get(antIndex); //Selects the ant to simulate.
+        //Creates board tiles and initial ants.
+        genTiles();
+        genAnts();
 
-		visitCenterTile();	//Quick fix to make the starting tile "visited".
-		
-		System.out.println("GENERATION: 0");
-		
-		while (!Display.isCloseRequested() && isDone == false)		//Runs until simulation is terminated, or finished.
-		{
-			//Keeps images from staying on screen.
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        boolean isDone = false; //True when the program is done.
+
+        int antIndex = 0;    //Which ant in the list of ants are we currently messing with.
+        ant = ants.get(antIndex); //Selects the ant to simulate.
+
+        visitCenterTile();    //Quick fix to make the starting tile "visited".
+
+        System.out.println("GENERATION: 0");
+
+        while (!Display.isCloseRequested() && isDone == false)        //Runs until simulation is terminated, or finished.
+        {
+            //Keeps images from staying on screen.
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 
             //Checks if ant has made significant progress, or if it should just be killed instead of finishing its run.
-			if (sameTileCount != visitedTiles)
-			{
-				noProgressCount = 0;
-				sameTileCount = visitedTiles;
-			}
-			else
-			{
-				noProgressCount++;
-			}
-			if (noProgressCount >= visitedTiles*4)	//Number of moves they can make before needing to add a new tile.
-			{
-				stepsTaken = maxNumOfSteps-1;
-			}
+            if (sameTileCount != visitedTiles) {
+                noProgressCount = 0;
+                sameTileCount = visitedTiles;
+            } else {
+                noProgressCount++;
+            }
+            if (noProgressCount >= visitedTiles * 4)    //Number of moves they can make before needing to add a new tile.
+            {
+                stepsTaken = maxNumOfSteps - 1;
+            }
 
 
-			//Basically just updates the tiles and keeps them drawn.
+            //Basically just updates the tiles and keeps them drawn.
             //Looks kinda funny if you comment out the update line.
-			for (int i = 0; i < tiles.size(); i++)
-			{
-				tiles.get(i).update();
-			}
-			
-			checkTile(ant); //calls the method that does all of the actions regarding the ant and tiles.
-			
-			ant.update();   //draws the ant and such...
-			stepsTaken++;
+            for (int i = 0; i < tiles.size(); i++) {
+                tiles.get(i).update();
+            }
+
+            checkTile(ant); //calls the method that does all of the actions regarding the ant and tiles.
+
+            ant.update();   //draws the ant and such...
+            stepsTaken++;
 
             //Checks if this ants turn is done.
-			if (stepsTaken == maxNumOfSteps || ant.isOffBoard() == true)
-			{
-				//Last ant in generation to check.
-				if (antIndex == ants.size()-1)
-				{
+            if (stepsTaken == maxNumOfSteps || ant.isOffBoard() == true) {
+                //Last ant in generation to check.
+                if (antIndex == ants.size() - 1) {
                     //Last generation to check.
-					if (currGeneration == lastGeneration)
-					{
-						isDone = true;
-					}
+                    if (currGeneration == lastGeneration) {
+                        isDone = true;
+                    }
                     currGeneration++;
-					ant.setScore(getVisitedTiles());    //Gives ant its fitness score.
-					averageFitness += ant.getFitness();
-					System.out.println();
-					if (currGeneration != lastGeneration)
-					{
-						System.out.println("GENERATION: " + currGeneration);
-					}
-					System.out.println("AVERGAE FITNESS: " + averageFitness/ants.size());
+                    ant.setScore(getVisitedTiles());    //Gives ant its fitness score.
+                    averageFitness += ant.getFitness();
+                    System.out.println();
+                    if (currGeneration != lastGeneration) {
+                        System.out.println("GENERATION: " + currGeneration);
+                    }
+                    System.out.println("AVERGAE FITNESS: " + averageFitness / ants.size());
 
                     //Resets everything for next run.
                     generateNextAnts();
-					averageFitness = 0;
-					stepsTaken = 0;
-					restartTiles();
-					antIndex = 0;
-					ant = ants.get(antIndex);
-					ant.resetOrientation();
-					visitCenterTile();
+                    averageFitness = 0;
+                    stepsTaken = 0;
+                    restartTiles();
+                    antIndex = 0;
+                    ant = ants.get(antIndex);
+                    ant.resetOrientation();
+                    visitCenterTile();
                     //
-				}
-				else
-				{
-					ant.setScore(getVisitedTiles());
-                    if (ant.getFitness() > bestAnt.getFitness())
-                    {
+                } else {
+                    ant.setScore(getVisitedTiles());
+                    if (ant.getFitness() >= bestAnt.getFitness()) {
                         bestAnt = ant;
                         System.out.println("======================================================");
                         System.out.println("NEWEST BEST FITNESS SCORE: " + bestAnt.getFitness());
                         bestAnt.getParentInfo();
                         System.out.println("======================================================");
                     }
-					averageFitness += ant.getFitness();
-					antIndex++;
-					ant = ants.get(antIndex);
-					ant.resetOrientation();
-					stepsTaken = 0;
-					restartTiles();
-					visitCenterTile();
-				}
-				noProgressCount = 0;
-				visitedTiles = 1;
-				sameTileCount = 0;
-			}
+                    averageFitness += ant.getFitness();
+                    antIndex++;
+                    ant = ants.get(antIndex);
+                    ant.resetOrientation();
+                    stepsTaken = 0;
+                    restartTiles();
+                    visitCenterTile();
+                }
+                noProgressCount = 0;
+                visitedTiles = 1;
+                sameTileCount = 0;
+            }
 
-			Display.update();
-			Display.sync(100);  //Basically this is the speed of the simulation
-		}
+            Display.update();
+            Display.sync(500);  //Basically this is the speed of the simulation
+        }
         System.out.println("======================================================");
         System.out.println("FINAL BEST FITNESS SCORE: " + bestAnt.getFitness());
+        bestAnt.getParentInfo();
         System.out.println("======================================================");
-		Display.destroy();  //Destorys the GUI
+        Display.destroy();  //Destorys the GUI
+
+        startTree();
  	}
+
+
+ 	private void startTree()
+    {
+        ancestors = new Ant[bestAnt.getID()];
+
+        ancestors[bestAnt.getID()-1] = bestAnt;
+        System.out.println("\n\n\n\n" + "BEST ANT ID: " + bestAnt.getID());
+        getAncestors(bestAnt);
+
+        for (int i = 0; i < ancestors.length; i++)
+        {
+            if (ancestors[i] == null)
+            {
+                //Do nothing.
+            }
+            else
+            {
+                if (ancestors[i].getParentA() == null)
+                {
+                    System.out.println(ancestors[i].getID() + " // COLOR OUT LIST ==> " + ancestors[i].getStringOfColors());
+                }
+                else
+                {
+                    System.out.println(ancestors[i].getParentA().getID() + " + " + ancestors[i].getParentB().getID() + " = " + ancestors[i].getID() + "    // COLOR OUT LIST  ==>    A: " + ancestors[i].getParentA().getStringOfColors() + "          B: " + ancestors[i].getParentB().getStringOfColors() + "          C: " + ancestors[i].getStringOfColors());
+                }
+            }
+        }
+    }
+
+    private void getAncestors(Ant a)
+    {
+        if (a.getParentA() == null)
+        {
+
+        }
+        else
+        {
+            //System.out.println("=============================================");
+            ancestors[a.getParentA().getID()] = a.getParentA();
+            ancestors[a.getParentB().getID()] = a.getParentB();
+            //System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAA");
+            //a.getParentA().getParentInfo();
+            //System.out.println("-------------------------");
+            //a.getParentB().getParentInfo();
+            //System.out.println("BBBBBBBBBBBBBBBBBBBBBBBBBB");
+            getAncestors(a.getParentA());
+            getAncestors(a.getParentB());
+            //System.out.println("=============================================");
+        }
+    }
 
 
 
@@ -183,6 +230,14 @@ public class Driver {
 				tmp.add(a);
 			}
 		}
+
+		//If there is only one ant above average, we will add another random ant to the batch so
+        //  it won't just breed with itself.
+		int index = rgen.nextInt(ants.size());
+		if (tmp.size() == 1)
+        {
+            tmp.add(ants.get(index));
+        }
 
         //This will see if there is one ant, or an odd amount and it will add a mutated ant to it to fix odd counts.
 		//This is for breeding purposes.
@@ -236,11 +291,11 @@ public class Driver {
             }
 
             //New ant with crossover implemented.
-            Ant a = new Ant(halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
+            Ant a = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
             a.setParents(mom,dad);
 
             //Adding mutation to ants here
-            final int MUTATION_CHANCE = 100;    //Change this to make mutation occur more or less.
+            final int MUTATION_CHANCE = 1000;    //Change this to make mutation occur more or less.
 
             int shouldMutate = rgen.nextInt(MUTATION_CHANCE);
             if (shouldMutate <= 1)	//1% chance
@@ -297,6 +352,7 @@ public class Driver {
 
 	private Ant mutate(Ant a)
     {
+        System.out.println("                                                        MUTATION OCCURED FOR " + a.getID());
         int index1 = 0;
         int index2 = 0;
         //Quick loop to make sure mutated indices don't pick the same DNA strand, which would basically do nothing, since
@@ -450,11 +506,18 @@ public class Driver {
 
         ArrayList<String> moveList = new ArrayList<>();
         moveList.add("turn clockwise");
+        moveList.add("turn clockwise");
+        moveList.add("turn counter clockwise");
+        moveList.add("turn counter clockwise");
         moveList.add("turn counter clockwise");
         moveList.add("turn around");
         moveList.add("move right");
+        moveList.add("move right");
+        moveList.add("move right");
         moveList.add("move backward");
         moveList.add("move left");
+        moveList.add("move left");
+        moveList.add("move forward");
         moveList.add("move forward");
         moveList.add("diaganol up right");
         moveList.add("diaganol up left");
@@ -487,7 +550,7 @@ public class Driver {
 				numOptions--;
 			}
 			
-			Ant ant = new Ant(halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED,colorList, moves, colorOut);
+			Ant ant = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED,colorList, moves, colorOut);
 			ants.add(ant);
 			
 			antsToMake--;

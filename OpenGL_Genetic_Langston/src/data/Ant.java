@@ -13,7 +13,7 @@ public class Ant {
 	private float x,y,height, width, fitness;
 	private Texture tex;
 	private String direction;
-	private int speed;
+	private int id,speed;
 	public String[] colorIn;
 	public String[] moves;
 	public String[] colorOut;
@@ -27,8 +27,9 @@ public class Ant {
     }
 
 	//Takes a color in from current tile, moves depending on color, changes that tile to new color.
-	public Ant(float x, float y, float height, float width, Texture tex, String direction, int speed, String[] colorIn, String[] moves, String[] colorOut)
+	public Ant(int id, float x, float y, float height, float width, Texture tex, String direction, int speed, String[] colorIn, String[] moves, String[] colorOut)
 	{
+        this.id = id;
 		this.y = y;
 		this.x = x;
 		this.height = height;
@@ -46,6 +47,11 @@ public class Ant {
             colorsUsed.put(colorIn[i],0);
         }
 	}
+
+	public int getID()
+    {
+        return id;
+    }
 
 	private void draw()
 	{
@@ -80,6 +86,15 @@ public class Ant {
         parentB = parB;
     }
 
+    public Ant getParentA()
+    {
+        return parentA;
+    }
+    public Ant getParentB()
+    {
+        return parentB;
+    }
+
 	public void getParentInfo()
     {
         if (parentA == null || parentB == null)
@@ -88,6 +103,9 @@ public class Ant {
         }
         else
         {
+            System.out.println("PARENT A ID: " + parentA.getID() + "  FITNESS SCORE: " + parentA.getFitness());
+            System.out.println("PARENT B ID: " + parentB.getID() + "  FITNESS SCORE: " + parentB.getFitness());
+            /*
             System.out.println("PARENT A MOVES AND COLOR OUTS: ");
             for (int i = 0; i < parentA.moves.length; i++)
             {
@@ -98,7 +116,7 @@ public class Ant {
             {
                 System.out.print(parentA.colorOut[i] + ", ");
             }
-            System.out.println();
+            System.out.println("\n");
 
             System.out.println("PARENT B MOVES AND COLOR OUTS: ");
             for (int i = 0; i < parentB.moves.length; i++)
@@ -110,10 +128,10 @@ public class Ant {
             {
                 System.out.print(parentB.colorOut[i] + ", ");
             }
-            System.out.println();
-
+            System.out.println("\n");
+            */
         }
-        System.out.println("CHILD ANT MOVES AND COLOR OUTS: ");
+        /*System.out.println("CHILD ANT MOVES AND COLOR OUTS: ");
         for (int i = 0; i < moves.length; i++)
         {
             System.out.print(moves[i] + ", ");
@@ -123,6 +141,8 @@ public class Ant {
         {
             System.out.print(colorOut[i] + ", ");
         }
+        */
+        System.out.println("CHILD ID: " + getID());
         System.out.println();
     }
 	
@@ -220,7 +240,17 @@ public class Ant {
 		}
 		return newColors;
 	}
-	
+
+
+	public String getStringOfColors()
+    {
+        String output = colorOut[0];
+        for (int i = 1; i < colorOut.length; i++)
+        {
+            output += ", " + colorOut[i];
+        }
+        return output;
+    }
 
 
 
