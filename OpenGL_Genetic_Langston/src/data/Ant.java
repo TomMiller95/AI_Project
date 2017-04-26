@@ -252,6 +252,16 @@ public class Ant {
         return output;
     }
 
+	public String getStringOfMoves()
+	{
+		String output = moves[0];
+		for (int i = 1; i < moves.length; i++)
+		{
+			output += ", " + moves[i];
+		}
+		return output;
+	}
+
 
 
 	public int getSliceSpot()
@@ -385,22 +395,22 @@ public class Ant {
 	{
 		if (direction.equals("north"))
 		{
-			tex = Textures.getTex("ant");	//east
+			tex = Textures.getTex("antEast");	//east
 			direction = "east";
 		}
 		else if (direction.equals("south"))
 		{
-			tex = Textures.getTex("ant");	//west
+			tex = Textures.getTex("antWest");	//west
 			direction = "west";
 		}
 		else if (direction.equals("west"))
 		{
-			tex = Textures.getTex("ant");	//north
+			tex = Textures.getTex("antNorth");	//north
 			direction = "north";
 		}
 		else if (direction.equals("east"))
 		{
-			tex = Textures.getTex("ant");	//south
+			tex = Textures.getTex("antSouth");	//south
 			direction = "south";
 		}
 	}
@@ -428,22 +438,22 @@ public class Ant {
 	{
 		if (direction.equals("north"))
 		{
-			tex = Textures.getTex("ant");	//west
+			tex = Textures.getTex("antWest");	//west
 			direction = "west";
 		}
 		else if (direction.equals("south"))
 		{
-			tex = Textures.getTex("ant"); //east
+			tex = Textures.getTex("antEast"); //east
 			direction = "east";
 		}
 		else if (direction.equals("west"))
 		{
-			tex = Textures.getTex("ant");	//south
+			tex = Textures.getTex("antSouth");	//south
 			direction = "south";
 		}
 		else if (direction.equals("east"))
 		{
-			tex = Textures.getTex("ant");	//north
+			tex = Textures.getTex("antNorth");	//north
 			direction = "north";
 		}
 	}

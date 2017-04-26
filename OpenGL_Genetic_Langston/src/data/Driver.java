@@ -149,7 +149,7 @@ public class Driver {
             }
 
             Display.update();
-            Display.sync(500);  //Basically this is the speed of the simulation
+            Display.sync(1);  //Basically this is the speed of the simulation
         }
         System.out.println("======================================================");
         System.out.println("FINAL BEST FITNESS SCORE: " + bestAnt.getFitness());
@@ -179,11 +179,11 @@ public class Driver {
             {
                 if (ancestors[i].getParentA() == null)
                 {
-                    System.out.println(ancestors[i].getID() + " // COLOR OUT LIST ==> " + ancestors[i].getStringOfColors());
+                    System.out.println(ancestors[i].getID() + " // COLOR OUT LIST ==> " + ancestors[i].getStringOfColors()+ " // MOVE LIST ==> " + ancestors[i].getStringOfMoves());
                 }
                 else
                 {
-                    System.out.println(ancestors[i].getParentA().getID() + " + " + ancestors[i].getParentB().getID() + " = " + ancestors[i].getID() + "    // COLOR OUT LIST  ==>    A: " + ancestors[i].getParentA().getStringOfColors() + "          B: " + ancestors[i].getParentB().getStringOfColors() + "          C: " + ancestors[i].getStringOfColors());
+                    System.out.println(ancestors[i].getParentA().getID() + " + " + ancestors[i].getParentB().getID() + " = " + ancestors[i].getID() + "    // COLOR OUT LIST  ==>    A: " + ancestors[i].getParentA().getStringOfColors() + "          B: " + ancestors[i].getParentB().getStringOfColors() + "          C: " + ancestors[i].getStringOfColors() + "    // MOVE LIST  ==>    A: " + ancestors[i].getParentA().getStringOfMoves() + "          B: " + ancestors[i].getParentB().getStringOfMoves() + "          C: " + ancestors[i].getStringOfMoves());
                 }
             }
         }
@@ -191,23 +191,12 @@ public class Driver {
 
     private void getAncestors(Ant a)
     {
-        if (a.getParentA() == null)
+        if (a.getParentA() != null)
         {
-
-        }
-        else
-        {
-            //System.out.println("=============================================");
             ancestors[a.getParentA().getID()] = a.getParentA();
             ancestors[a.getParentB().getID()] = a.getParentB();
-            //System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAA");
-            //a.getParentA().getParentInfo();
-            //System.out.println("-------------------------");
-            //a.getParentB().getParentInfo();
-            //System.out.println("BBBBBBBBBBBBBBBBBBBBBBBBBB");
             getAncestors(a.getParentA());
             getAncestors(a.getParentB());
-            //System.out.println("=============================================");
         }
     }
 
@@ -273,7 +262,10 @@ public class Driver {
 
             //This will make sure it passes good DNA which will speed up the process.
             //Could randomly generate this number to make it more random, but will slow down results.
-            slicer = ants.get(i).getSliceSpot();
+            //slicer = ants.get(i).getSliceSpot();
+
+            //Use this slicer to make it more of a random choice, which will have a chance of losing progress.
+            slicer = rgen.nextInt(colorList.length);
 
             if (firstParent == true)
             {
@@ -291,16 +283,15 @@ public class Driver {
             }
 
             //New ant with crossover implemented.
-            Ant a = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED, colorList, crossedMoves, crossedColors);
+            Ant a = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("antNorth"),"north", SPEED, colorList, crossedMoves, crossedColors);
             a.setParents(mom,dad);
 
             //Adding mutation to ants here
             final int MUTATION_CHANCE = 1000;    //Change this to make mutation occur more or less.
 
             int shouldMutate = rgen.nextInt(MUTATION_CHANCE);
-            if (shouldMutate <= 1)	//1% chance
+            if (shouldMutate <= 1)	//0.1% chance
             {
-                //System.out.println("MUTATION OCCURED");
                 a = mutate(a);
             }
             tmp.add(a);
@@ -550,7 +541,7 @@ public class Driver {
 				numOptions--;
 			}
 			
-			Ant ant = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("ant"),"north", SPEED,colorList, moves, colorOut);
+			Ant ant = new Ant(id++,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("antNorth"),"north", SPEED,colorList, moves, colorOut);
 			ants.add(ant);
 			
 			antsToMake--;
