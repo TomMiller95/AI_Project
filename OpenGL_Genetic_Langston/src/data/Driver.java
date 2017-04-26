@@ -26,16 +26,17 @@ public class Driver {
 	String[] colorList = {"white","black","blue","green","yellow","red"};	//Basic list of colors for an ant to recieve.
 	private ArrayList<Ant> ants = new ArrayList<>();	//Holds the ants of the current generation.
 	private int currGeneration = 0;	//Current generation number.
-	private int lastGeneration = 99; //This is the last generation wanted - 1. EX: gen. 10 = 9
+	private int lastGeneration = 9; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
-	int numOfAntsNeeded = 100;	//Number of ants per generation.
+	int numOfAntsNeeded = 10;	//Number of ants per generation.
 	int maxNumOfSteps = 10000;	//Maximum amount of steps an ant can take before it dies.
 	float averageFitness = 0;	//Total fitness throughout a generation.
 	static int visitedTiles = 1;	//Number of tiles touched so far.
 	int sameTileCount = 0; 	//Counter to see if ant has made any progress.
 	int noProgressCount = 0;	//Used to see if an ant is making progress fast enough. If not, it dies.
 	final int AMOUNT_OF_ANT_ACTIONS = colorList.length;
+    private int displaySpeed = 500;  //Speed at which to loop through the program.
 	Textures t = new Textures();
     Random rgen = new Random();
     Ant bestAnt = new Ant(0);  //The ant with the highest score.
@@ -48,17 +49,11 @@ public class Driver {
         BeginSession();
         t.load();
 
-        //Future idea will be to feed the program an image, and the image will be broken down into the tiles on the board, and
-        //	the ants will try to make the picture.
-		/*try {
-			PixelMachine p = new PixelMachine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-
         //Creates board tiles and initial ants.
         genTiles();
         genAnts();
+        //Ant oldAnt = new Ant(10000,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("antNorth"),"north",SPEED,colorList,"265321","44a423");
+        //ants.set(0,oldAnt);
 
         boolean isDone = false; //True when the program is done.
 
@@ -133,6 +128,7 @@ public class Driver {
                         System.out.println("======================================================");
                         System.out.println("NEWEST BEST FITNESS SCORE: " + bestAnt.getFitness());
                         bestAnt.getParentInfo();
+                        bestAnt.printDNAString();
                         System.out.println("======================================================");
                     }
                     averageFitness += ant.getFitness();
@@ -149,11 +145,12 @@ public class Driver {
             }
 
             Display.update();
-            Display.sync(1);  //Basically this is the speed of the simulation
+            Display.sync(displaySpeed);  //Basically this is the speed of the simulation
         }
         System.out.println("======================================================");
         System.out.println("FINAL BEST FITNESS SCORE: " + bestAnt.getFitness());
         bestAnt.getParentInfo();
+        bestAnt.getStringOfMoves();
         System.out.println("======================================================");
         Display.destroy();  //Destorys the GUI
 

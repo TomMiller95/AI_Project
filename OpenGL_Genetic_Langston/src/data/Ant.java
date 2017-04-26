@@ -26,6 +26,110 @@ public class Ant {
         this.fitness = score;
     }
 
+    public Ant(int id, float x, float y, float height, float width, Texture tex, String direction, int speed,String[] colorList, String colorsCode, String movesCode)
+    {
+        this.id = id;
+        this.y = y;
+        this.x = x;
+        this.height = height;
+        this.width = width;
+        this.tex = tex;
+        this.direction = direction;
+        this.speed = speed;
+        colorIn = colorList;
+        String[] colorsChars = colorsCode.split("");
+        String[] movesChars = movesCode.split("");
+
+        colorOut = new String[colorsChars.length];
+        moves = new String[movesChars.length];
+
+        for (int i = 0; i < colorsChars.length; i++)
+        {
+            System.out.println(i);
+            if (colorsChars[i].equals("1"))
+            {
+                colorOut[i] = "white";  //white black blue green yellow red
+            }
+            else if (colorsChars[i].equals("2"))
+            {
+                colorOut[i] = "black";
+            }
+            else if (colorsChars[i].equals("3"))
+            {
+                colorOut[i] = "blue";
+            }
+            else if (colorsChars[i].equals("4"))
+            {
+                colorOut[i] = "green";
+            }
+            else if (colorsChars[i].equals("5"))
+            {
+                colorOut[i] = "yellow";
+            }
+            else if (colorsChars[i].equals("6"))
+            {
+                colorOut[i] = "red";
+            }
+        }
+
+        for (int i = 0; i < movesChars.length; i++) {
+            System.out.println(i);
+            if (movesChars[i].equals("1")) {
+                moves[i] = "turn clockwise";  //white black blue green yellow red
+            }
+            else if (movesChars[i].equals("2")) {
+                moves[i] = "turn counter clockwise";
+            }
+            else if (movesChars[i].equals("3")) {
+                moves[i] = "turn around";
+            }
+            else if (movesChars[i].equals("4")) {
+                moves[i] = "move right";
+            }
+            else if (movesChars[i].equals("5")) {
+                moves[i] = "move backward";
+            }
+            else if (movesChars[i].equals("6")) {
+                moves[i] = "move left";
+            }
+            else if (movesChars[i].equals("7")) {
+                moves[i] = "move forward";
+            }
+            else if (movesChars[i].equals("8")) {
+                moves[i] = "diaganol up right";
+            }
+            else if (movesChars[i].equals("9")) {
+                moves[i] = "diaganol up left";
+            }
+            else if (movesChars[i].equals("a")) {
+                moves[i] = "diaganol down right";
+            }
+            else if (movesChars[i].equals("b")) {
+                moves[i] = "diaganol down left";
+            }
+            else if (movesChars[i].equals("c")) {
+                moves[i] = "skip up";
+            }
+            else if (movesChars[i].equals("d")) {
+                moves[i] = "skip down";
+            }
+            else if (movesChars[i].equals("e")) {
+                moves[i] = "skip left";
+            }
+            else if (movesChars[i].equals("f")) {
+                moves[i] = "skip right";
+            }
+            else if (movesChars[i].equals("g")) {
+                moves[i] = "dont move";
+            }
+        }
+
+        for (int i = 0; i < colorIn.length; i++)
+        {
+            colorsUsed.put(colorIn[i],0);
+        }
+    }
+
 	//Takes a color in from current tile, moves depending on color, changes that tile to new color.
 	public Ant(int id, float x, float y, float height, float width, Texture tex, String direction, int speed, String[] colorIn, String[] moves, String[] colorOut)
 	{
@@ -47,6 +151,116 @@ public class Ant {
             colorsUsed.put(colorIn[i],0);
         }
 	}
+
+	public void printDNAString()
+    {
+        System.out.print("Color String ");
+        for(int i = 0; i < colorOut.length; i++)
+        {
+            if (colorOut[i].equals("white"))
+            {
+                System.out.print("1");
+            }
+            else if (colorOut[i].equals("black"))
+            {
+                System.out.print("2");
+            }
+            else if (colorOut[i].equals("blue"))
+            {
+                System.out.print("3");
+            }
+            else if (colorOut[i].equals("green"))
+            {
+                System.out.print("4");
+            }
+            else if (colorOut[i].equals("yellow"))
+            {
+                System.out.print("5");
+            }
+            else if (colorOut[i].equals("red"))
+            {
+                System.out.print("6");
+            }
+            else
+            {
+                System.out.print("XXX");
+            }
+        }
+        System.out.println();
+        System.out.print("Move String ");
+        for(int i = 0; i < moves.length; i++)
+        {
+            if (moves[i].equals("turn clockwise"))
+            {
+                System.out.print("1");
+            }
+            else if (moves[i].equals("turn counter clockwise"))
+            {
+                System.out.print("2");
+            }
+            else if (moves[i].equals("turn around"))
+            {
+                System.out.print("3");
+            }
+            else if (moves[i].equals("move right"))
+            {
+                System.out.print("4");
+            }
+            else if (moves[i].equals("move backward"))
+            {
+                System.out.print("5");
+            }
+            else if (moves[i].equals("move left"))
+            {
+                System.out.print("6");
+            }
+            else if (moves[i].equals("move forward"))
+            {
+                System.out.print("7");
+            }
+            else if (moves[i].equals("diaganol up right"))
+            {
+                System.out.print("8");
+            }
+            else if (moves[i].equals("diaganol up left"))
+            {
+                System.out.print("9");
+            }
+            else if (moves[i].equals("diaganol down right"))
+            {
+                System.out.print("a");
+            }
+            else if (moves[i].equals("diaganol down left"))
+            {
+                System.out.print("b");
+            }
+            else if (moves[i].equals("skip up"))
+            {
+                System.out.print("c");
+            }
+            else if (moves[i].equals("skip down"))
+            {
+                System.out.print("d");
+            }
+            else if (moves[i].equals("skip left"))
+            {
+                System.out.print("e");
+            }
+            else if (moves[i].equals("skip right"))
+            {
+                System.out.print("f");
+            }
+            else if (moves[i].equals("dont move"))
+            {
+                System.out.print("g");
+            }
+            else
+            {
+                System.out.print("XXX");
+            }
+        }
+        System.out.println();
+    }
 
 	public int getID()
     {
@@ -99,49 +313,13 @@ public class Ant {
     {
         if (parentA == null || parentB == null)
         {
-            System.out.println("This ant has no parents, but here are its moves anyway: ");
+            System.out.println("This ant has no parents.");
         }
         else
         {
             System.out.println("PARENT A ID: " + parentA.getID() + "  FITNESS SCORE: " + parentA.getFitness());
             System.out.println("PARENT B ID: " + parentB.getID() + "  FITNESS SCORE: " + parentB.getFitness());
-            /*
-            System.out.println("PARENT A MOVES AND COLOR OUTS: ");
-            for (int i = 0; i < parentA.moves.length; i++)
-            {
-                System.out.print(parentA.moves[i] + ", ");
-            }
-            System.out.println();
-            for (int i = 0; i < parentA.colorOut.length; i++)
-            {
-                System.out.print(parentA.colorOut[i] + ", ");
-            }
-            System.out.println("\n");
-
-            System.out.println("PARENT B MOVES AND COLOR OUTS: ");
-            for (int i = 0; i < parentB.moves.length; i++)
-            {
-                System.out.print(parentB.moves[i] + ", ");
-            }
-            System.out.println();
-            for (int i = 0; i < parentB.colorOut.length; i++)
-            {
-                System.out.print(parentB.colorOut[i] + ", ");
-            }
-            System.out.println("\n");
-            */
         }
-        /*System.out.println("CHILD ANT MOVES AND COLOR OUTS: ");
-        for (int i = 0; i < moves.length; i++)
-        {
-            System.out.print(moves[i] + ", ");
-        }
-        System.out.println();
-        for (int i = 0; i < colorOut.length; i++)
-        {
-            System.out.print(colorOut[i] + ", ");
-        }
-        */
         System.out.println("CHILD ID: " + getID());
         System.out.println();
     }
