@@ -39,7 +39,6 @@ public class Artist {
 	
 	public static void DrawQuadTex(Texture t, float x, float y, float height, float width)
 	{
-		
 		t.bind();
 		glTranslatef(x, y, 0);
 		glBegin(GL_QUADS);

@@ -1,6 +1,7 @@
 package data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import org.lwjgl.Sys;
@@ -26,10 +27,10 @@ public class Driver {
 	String[] colorList = {"white","black","blue","green","yellow","red"};	//Basic list of colors for an ant to recieve.
 	private ArrayList<Ant> ants = new ArrayList<>();	//Holds the ants of the current generation.
 	private int currGeneration = 0;	//Current generation number.
-	private int lastGeneration = 9; //This is the last generation wanted - 1. EX: gen. 10 = 9
+	private int lastGeneration = 99; //This is the last generation wanted - 1. EX: gen. 10 = 9
 	static int numTiles = (WINDOW_LENGTH/TILE_SIZE)*(WINDOW_WIDTH/TILE_SIZE);
 	static boolean[] visited = new boolean[numTiles];
-	int numOfAntsNeeded = 10;	//Number of ants per generation.
+	int numOfAntsNeeded = 20;	//Number of ants per generation.
 	int maxNumOfSteps = 10000;	//Maximum amount of steps an ant can take before it dies.
 	float averageFitness = 0;	//Total fitness throughout a generation.
 	static int visitedTiles = 1;	//Number of tiles touched so far.
@@ -40,6 +41,7 @@ public class Driver {
 	Textures t = new Textures();
     Random rgen = new Random();
     Ant bestAnt = new Ant(0);  //The ant with the highest score.
+    Ant genBestAnt = new Ant(0);  //The ant with the highest score per generation.
 
     int id = 0;
     Ant[] ancestors;
@@ -109,7 +111,9 @@ public class Driver {
                     if (currGeneration != lastGeneration) {
                         System.out.println("GENERATION: " + currGeneration);
                     }
-                    System.out.println("AVERGAE FITNESS: " + averageFitness / ants.size());
+                    System.out.println("BEST FITNESS OF THIS GENERATION: " + genBestAnt.getFitness());
+                    genBestAnt = new Ant(0);
+                    //System.out.println("AVERGAE FITNESS: " + averageFitness / ants.size());
 
                     //Resets everything for next run.
                     generateNextAnts();
@@ -123,6 +127,9 @@ public class Driver {
                     //
                 } else {
                     ant.setScore(getVisitedTiles());
+                    if (ant.getFitness() >= genBestAnt.getFitness()) {
+                        genBestAnt = ant;
+                        }
                     if (ant.getFitness() >= bestAnt.getFitness()) {
                         bestAnt = ant;
                         System.out.println("======================================================");
@@ -176,11 +183,11 @@ public class Driver {
             {
                 if (ancestors[i].getParentA() == null)
                 {
-                    System.out.println(ancestors[i].getID() + " // COLOR OUT LIST ==> " + ancestors[i].getStringOfColors()+ " // MOVE LIST ==> " + ancestors[i].getStringOfMoves());
+                    System.out.println(ancestors[i].getID());// + " // COLOR OUT LIST ==> " + ancestors[i].getStringOfColors()+ " // MOVE LIST ==> " + ancestors[i].getStringOfMoves());
                 }
                 else
                 {
-                    System.out.println(ancestors[i].getParentA().getID() + " + " + ancestors[i].getParentB().getID() + " = " + ancestors[i].getID() + "    // COLOR OUT LIST  ==>    A: " + ancestors[i].getParentA().getStringOfColors() + "          B: " + ancestors[i].getParentB().getStringOfColors() + "          C: " + ancestors[i].getStringOfColors() + "    // MOVE LIST  ==>    A: " + ancestors[i].getParentA().getStringOfMoves() + "          B: " + ancestors[i].getParentB().getStringOfMoves() + "          C: " + ancestors[i].getStringOfMoves());
+                    System.out.println(ancestors[i].getParentA().getID() + " + " + ancestors[i].getParentB().getID() + " = " + ancestors[i].getID());// + "    // COLOR OUT LIST  ==>    A: " + ancestors[i].getParentA().getStringOfColors() + "          B: " + ancestors[i].getParentB().getStringOfColors() + "          C: " + ancestors[i].getStringOfColors() + "    // MOVE LIST  ==>    A: " + ancestors[i].getParentA().getStringOfMoves() + "          B: " + ancestors[i].getParentB().getStringOfMoves() + "          C: " + ancestors[i].getStringOfMoves());
                 }
             }
         }
@@ -229,6 +236,7 @@ public class Driver {
 		//This is for breeding purposes.
         if (tmp.size() == 1 || tmp.size() % 2 > 0)
         {
+            System.out.println("MUTATION OCCURRED FOR            " + ant.getID());
             tmp.add(mutate(tmp.get(0)));    //Just mutate the first ant and add it to the bottom of the list.
         }
 		
@@ -236,9 +244,9 @@ public class Driver {
 		ants = tmp;
 
 		crossOver();   //Breeds ant together.
+        Collections.shuffle(ants);  //Shuffles the ants so it increases randomness.
 		genAnts();  //Adding new ants to fill the places of the old failing ants.
 	}
-
 
 	
 	/**
@@ -284,11 +292,13 @@ public class Driver {
             a.setParents(mom,dad);
 
             //Adding mutation to ants here
-            final int MUTATION_CHANCE = 1000;    //Change this to make mutation occur more or less.
+            final int MUTATION_CHANCE = 10000;    //Change this to make mutation occur more or less.
 
             int shouldMutate = rgen.nextInt(MUTATION_CHANCE);
-            if (shouldMutate <= 1)	//0.1% chance
+
+            if (shouldMutate == 1)	//0.01% chance
             {
+                System.out.println("MUTATION OCCURRED FOR            " + ant.getID());
                 a = mutate(a);
             }
             tmp.add(a);
@@ -340,7 +350,6 @@ public class Driver {
 
 	private Ant mutate(Ant a)
     {
-        System.out.println("                                                        MUTATION OCCURED FOR " + a.getID());
         int index1 = 0;
         int index2 = 0;
         //Quick loop to make sure mutated indices don't pick the same DNA strand, which would basically do nothing, since
