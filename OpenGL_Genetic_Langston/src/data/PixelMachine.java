@@ -5,174 +5,126 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 public class PixelMachine {
 
-	public PixelMachine() throws IOException{
+	public PixelMachine() throws IOException {
 
-		BufferedImage hugeImage = ImageIO.read(Driver.class.getResource("hungryCarly.png"));
-		//BufferedImage hugeImage = ImageIO.read(Driver.class.getResource("colorTest.png"));
-
-			//int[][] result = convertTo2DUsingGetRGB(hugeImage);
-			genEasyImage(hugeImage);
-			//randomPixels();
+		BufferedImage hugeImage = ImageIO.read(Driver.class.getResource("test.png"));
+        //BufferedImage hugeImage = ImageIO.read(Driver.class.getResource("blueTile.png"));
+		genEasyImage(hugeImage);
 	}
 
-	private static int[][] convertTo2DUsingGetRGB(BufferedImage image) { 
+
+	private static void genEasyImage(BufferedImage image) {
 		int width = image.getWidth();
 		int height = image.getHeight();
+		int h = height % 40;
+		int w = width % 40;
+		//height -= h;
+		//width -= w;
+
+        HashMap<String,Integer> hmap = new HashMap<>();
+        int[] pixel;
 		int[][] result = new int[height][width];
-		
-		int n = 0;
 		for (int row = 0; row < height; row++) {
 			for (int col = 0; col < width; col++) {
 				result[row][col] = image.getRGB(col, row);
-				//System.out.println(image.getRGB(col,row));
-				n++;
+                pixel = image.getRaster().getPixel(row, col, new int[3]);
+
+                if (hmap.get(pixel[0] + " - " + pixel[1] + " - " + pixel[2]) == null)
+                {
+                    hmap.put(pixel[0] + " - " + pixel[1] + " - " + pixel[2],1);
+                }
+                else
+                {
+                    hmap.put(pixel[0] + " - " + pixel[1] + " - " + pixel[2], hmap.get(pixel[0] + " - " + pixel[1] + " - " + pixel[2]) + 1);
+                }
+                //System.out.println(pixel[0] + " - " + pixel[1] + " - " + pixel[2]);
 			}
 		}
-		System.out.println(height + " " + width);
-		System.out.println(n);
+        Iterator it = hmap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            it.remove(); // avoids a ConcurrentModificationException
+        }
 
-		return result;
+        buildPixelatedImage(result, height, width);
+
+		//rebuildImage(result, height, width);
 	}
-	
-	
-	
-	public static Image getImageFromArray(int[] pixels, int width, int height) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        WritableRaster raster = (WritableRaster) image.getData();
-        raster.setPixels(0,0,width,height,pixels);
-        return image;
+
+
+
+
+
+
+
+
+    private static void buildPixelatedImage(int[][] pixels, int width, int height) {
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        //file object
+        File f = null;
+        //create random image pixel by pixel
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+
+                int p = pixels[y][x];
+                img.setRGB(x, y, p);
+            }
+        }
+
+
+        //write image
+        try {
+            f = new File("output.png");
+            ImageIO.write(img, "png", f);
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
+        }
     }
-	
-	
-	
-	
-	
-	private static void genEasyImage(BufferedImage image)
-	{
-		int width = image.getWidth();
-		int height = image.getHeight();
-		int h = height % 40;
-		int w = width % 40;
-		//height -= h;
-		//width -= w;
-		
-		int[][] result = new int[height][width];
-													System.out.println(result.length);
-	    for (int row = 0; row < height; row++) {
-	       for (int col = 0; col < width; col++) {
-	          result[row][col] = image.getRGB(col, row);
-	       }
-	    }
-									
-		//getImageFromArray(arrayResult, width, height);
-		randPixels(result, height, width);
-	}
-	
 
-	
-	private static void randPixels(int[][] pixels, int width, int height)
-	{
-	     //create buffered image object img
-	     BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-	     //file object
-	     File f = null;
-	     //create random image pixel by pixel
-	     for(int x = 0; x < width; x++){
-	    	 for(int y = 0; y < height; y++){
-	         
-	    	   int p = pixels[x][y];
-	    	   
-	    	   img.setRGB(x, y, p);
-	       }
-	     }
-	     //write image
-	     try{
-	       f = new File("D:\\Image\\Output.png");
-	       ImageIO.write(img, "png", f);
-	     }catch(IOException e){
-	       System.out.println("Error: " + e);
-	     }
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	private static void mehgenEasyImage(BufferedImage image)
-	{
-		int width = image.getWidth();
-		int height = image.getHeight();
-		int h = height % 40;
-		int w = width % 40;
-		//height -= h;
-		//width -= w;
-		
-		int[] arrayResult = new int[height * width];
-		
-		int x = 0;
-		for (int row = 0; row < width; row++) {
-			for (int col = 0; col < height; col++) {
-				arrayResult[x] = image.getRGB(row, col);
-				x++;
+
+
+
+
+
+
+
+
+
+
+
+
+	private static void rebuildImage(int[][] pixels, int width, int height) {
+		//create buffered image object img
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		//file object
+		File f = null;
+		//create random image pixel by pixel
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+
+				int p = pixels[y][x];
+                img.setRGB(x, y, p);
 			}
 		}
-									
-		//getImageFromArray(arrayResult, width, height);
-		randomPixels(arrayResult, width, height);
-	}
-	
-	
-	
-	private static void findColor()
-	{
-		
-	}
-	
-	
-	
-	
-	
-	private static void randomPixels(int[] pixels, int width, int height)
-	{
-	     //create buffered image object img
-	     BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-	     //file object
-	     File f = null;
-	     //create random image pixel by pixel
-	     
-	     //for(int y = 0; y < height; y++) {
-	    	// for(int x = 0; x < width; x++){
-	     for (int y = height; y > 0; y--) {
-	    	 for (int x = width; x > 0; x--) {
-	         
-	    	   int p = pixels[x+y];
-	    	   
-	    	   img.setRGB(x, y, p);
-	       }
-	     }
-	     //write image
-	     try{
-	       f = new File("D:\\Image\\Output.png");
-	       ImageIO.write(img, "png", f);
-	     }catch(IOException e){
-	       System.out.println("Error: " + e);
-	     }
+
+
+		//write image
+		try {
+			f = new File("output.png");
+			ImageIO.write(img, "png", f);
+		} catch (IOException e) {
+			System.out.println("Error: " + e);
+		}
 	}
 }

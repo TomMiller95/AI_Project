@@ -1,5 +1,6 @@
 package data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -54,7 +55,10 @@ public class Driver {
         //Creates board tiles and initial ants.
         genTiles();
         genAnts();
-        //Ant oldAnt = new Ant(10000,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("antNorth"),"north",SPEED,colorList,"265321","44a423");
+
+        //Color String 454233
+        //Move String 64e4d5
+        //Ant oldAnt = new Ant(10000,halfOfBoardLength+OFFSET,halfOfBoardWidth+OFFSET,TILE_SIZE,TILE_SIZE,Textures.getTex("antNorth"),"north",SPEED,colorList,"454233","64e4d5");
         //ants.set(0,oldAnt);
 
         boolean isDone = false; //True when the program is done.
@@ -574,8 +578,14 @@ public class Driver {
 			}
 		}
 	}
-	public static void main(String[] args)
+
+	private static void pix() throws IOException
+    {
+        PixelMachine pm = new PixelMachine();
+    }
+
+	public static void main(String[] args) throws IOException
 	{
-		new Driver();
+		pix();//new Driver();
 	}
 }
